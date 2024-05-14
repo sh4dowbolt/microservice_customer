@@ -54,11 +54,38 @@ public class OrderService {
         } catch (Exception e) {
             log.error("For Order ID: {}, cannot create Order in Customer Microservice for reason: {}",
                     order.getId(), e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("For Order UUID: %s, Customer Microservice Response: %d",
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("For Order ID: %s, Customer Microservice Response: %d",
                     order.getId(), e.getMessage()));
         }
+    }
 
+    public void updateOrder(Order order) {
+        final var url = customerBaseUrl+CUSTOMER_ORDER_URL+order.getCustomerId();
+        final var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
+        log.info("Order Request URL: {}", url);
+
+        try{
+           final var request = new HttpEntity<>(order, headers);
+           restTemplate.put(url, request);
+        }  catch (Exception e) {
+            log.error("For Order ID: {}, cannot create Order in Customer Microservice for reason: {}",order.getId(),e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("For Order ID: %s, Customer Microservice Response: %d", order.getId(),e.getMessage()));
+        }
+    }
+
+    public void deleteOrder(Order order) {
+        final var url = customerBaseUrl+CUSTOMER_ORDER_URL+order.getCustomerId()+"/"+order.getId();
+
+        log.info("Order Request URL {}", url);
+
+        try{
+            restTemplate.delete(url);
+        } catch (Exception e) {
+                log.error("For Order ID: {}, cannot create Order in Customer Microservice for reason: {}", order.getId(),e.getMessage());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("For Order ID: %s, Customer Microservice Response: %d", order.getId(),e.getMessage()));
+        }
     }
 
 }
