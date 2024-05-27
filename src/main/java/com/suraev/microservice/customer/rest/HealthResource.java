@@ -1,4 +1,4 @@
-package com.suraev.microservice.customer.webOrRest;
+package com.suraev.microservice.customer.rest;
 
 import com.suraev.microservice.customer.domain.Health;
 import com.suraev.microservice.customer.domain.HealthStatus;
