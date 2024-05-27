@@ -38,7 +38,7 @@ public class CustomerOrderResource {
     /**
      * {@Code POST /customerOrders/{customerId}} : Создаем новый заказ для указанного клиента
      *
-     * @param customerId ID покупателя
+     * @param customerId ID покупателя.
      * @param order      заказ для создания
      * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} с телом заказа или со статусом {@Code 400 (Bad Request)} если у заказа уже есть ID.
      * @throws ResponseStatusException если синтаксис ссылки нарушен
