@@ -148,6 +148,7 @@ public class CustomerOrderResource {
 
         if (customerId.isBlank()) {
             throw new BadRequestAlertException("No customer", ENTITY_NAME, "noid");
+
         }
         final var optionalCustomer = customerRepository.findById(customerId);
         if (optionalCustomer.isPresent()) {
