@@ -1,19 +1,22 @@
 package com.suraev.microservice.customer.exceptions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.zalando.problem.AbstractThrowableProblem;
 import org.zalando.problem.Status;
 
+
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BadRequestAlertException extends AbstractThrowableProblem {
-
+public class BadRequestAlertException extends AbstractThrowableProblem  {
     private static final long serialVersionUID = 1L;
 
     private final String entityName;
 
     private final String errorKey;
+
 
     public BadRequestAlertException(String defaultMessage, String entityName, String errorKey) {
         this(ErrorConstants.DEFAULT_TYPE, defaultMessage, entityName, errorKey);
@@ -39,4 +42,6 @@ public class BadRequestAlertException extends AbstractThrowableProblem {
         parameters.put("params", entityName);
         return parameters;
     }
+
+
 }

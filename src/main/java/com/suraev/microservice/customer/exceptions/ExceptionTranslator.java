@@ -1,7 +1,6 @@
 package com.suraev.microservice.customer.exceptions;
 
 import com.suraev.microservice.customer.util.HeaderUtil;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -19,7 +18,9 @@ import org.zalando.problem.spring.web.advice.AdviceTrait;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.violations.ConstraintViolationProblem;
 
-import java.lang.annotation.Native;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 public class ExceptionTranslator implements ProblemHandling, AdviceTrait {
 
     /**
-     * Controller advice служит для репрезентации исключений со стороны сервера к client-friendly json струкутуре
+     * Controller advice служит для репрезентации исключений со стороны сервера
      */
 
     private static final String FIELD_ERRORS_KEY = "fieldErrors";
@@ -42,9 +43,9 @@ public class ExceptionTranslator implements ProblemHandling, AdviceTrait {
 
 
     @Override
-    public ResponseEntity<Problem> process(ResponseEntity<Problem> entity, NativeWebRequest request) {
+    public ResponseEntity<Problem> process(@Nullable ResponseEntity<Problem> entity, NativeWebRequest request) {
         if (entity == null) {
-            return entity;
+            return null;
         }
         Problem problem = entity.getBody();
         if (!(problem instanceof ConstraintViolationProblem || problem instanceof DefaultProblem)) {
@@ -75,7 +76,7 @@ public class ExceptionTranslator implements ProblemHandling, AdviceTrait {
     }
 
     @Override
-    public ResponseEntity<Problem> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, NativeWebRequest request) {
+    public ResponseEntity<Problem> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, @Nonnull NativeWebRequest request) {
         BindingResult result = exception.getBindingResult();
         List<FieldErrorVM> fieldErrorVMList = result.getFieldErrors().stream()
                 .map(f -> new FieldErrorVM(f.getObjectName().replaceFirst("DTO$", ""), f.getField(), f.getCode()))
@@ -86,6 +87,7 @@ public class ExceptionTranslator implements ProblemHandling, AdviceTrait {
                 .withTitle("Method argument not valid")
                 .withStatus(defaultConstraintViolationStatus())
                 .with(MESSAGE_KEY, ErrorConstants.ERR_VALIDATION)
+                .with(FIELD_ERRORS_KEY,fieldErrorVMList)
                 .build();
         return create(exception, problem, request);
     }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/v1")
 public class CustomerResource {
     private final Logger log = LoggerFactory.getLogger(CustomerResource.class);
 
