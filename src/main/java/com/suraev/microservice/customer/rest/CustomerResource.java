@@ -2,7 +2,9 @@ package com.suraev.microservice.customer.rest;
 
 
 import com.suraev.microservice.customer.domain.Customer;
+import com.suraev.microservice.customer.exceptions.BadRequestAlertException;
 import com.suraev.microservice.customer.repository.CustomerRepository;
+import com.suraev.microservice.customer.util.ResponseUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +37,16 @@ public class CustomerResource {
 
 
     /**
-     * {@Code POST /customers} : создать новый заказ
+     * {@Code POST /customers} : создать нового клиента
      * @param customer - это клиент необходимый для создания
-     * @return {@link ResponseEntity} со статусом {@Code 201 (Created)} с телом нового заказа, или со статусом {@Code 409 (Conflict)} если у клиента уже есть ID.
-     * @throws ResponseStatusException если синтаксис ссылки нарушен
+     * @return {@link ResponseEntity} со статусом {@Code 201 (Created)} с телом нового заказа, или со статусом {@Code 400 (Bad Request)} если у клиента уже есть ID.
+     * @throws BadRequestAlertException если клиент с данным ID уже существует
      */
     @PostMapping("/customers")
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
         log.debug("REST request to save Customer: {},",customer);
         if(customer.getId()!= null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"A new customer cannot already have an ID");
+            throw new BadRequestAlertException("A new customer cannot already have an ID", ENTITY_NAME,"idexists");
         }
         var result = customerRepository.save(customer);
 
@@ -63,14 +65,14 @@ public class CustomerResource {
      * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} и телом обновленного клиента,
      * или со статусом {@Code 409 (Conflict)} если клиент некорректный,
      * или со статусом {@Code 500 (Internal Server Error)} если клиент не может быть обновлен.
-     * @throws ResponseStatusException если синтаксис ссылки некорректен.
+     * @throws BadRequestAlertException если синтаксис ссылки некорректен.
      */
     @PutMapping("/customers")
     public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer) {
         log.debug("REST request to update Customer: {}", customer);
 
         if(customer.getId()==null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "An existing customer should have an id");
+            throw new BadRequestAlertException("An existing customer should have an id",ENTITY_NAME,"iddontexist");
         }
         var result = customerRepository.save(customer);
 
@@ -87,18 +89,13 @@ public class CustomerResource {
      * {@Code GET /customers/:id} : получить клиента по ID
      * @param id - ID клиента
      * @return {@link ResponseEntity} со статусом {@Code 200 (OK)}  с телом заказа, или со статусом {@Code 404 (Not found)}.
-     * @throws Exception если не существует клиента с таким ID.
      */
 
     @GetMapping("/customers/{id}")
     public ResponseEntity<Customer> getCustomer(@PathVariable String id) {
         log.debug("REST request to get Customer: {}", id);
-        try {
-            final var result = customerRepository.findById(id).orElseThrow();
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+            final var customer = customerRepository.findById(id);
+            return ResponseUtil.wrapOrNotFound(customer);
     }
 
     /**

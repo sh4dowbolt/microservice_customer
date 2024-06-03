@@ -3,7 +3,9 @@ package com.suraev.microservice.customer.rest;
 
 import com.suraev.microservice.customer.domain.Customer;
 import com.suraev.microservice.customer.domain.Order;
+import com.suraev.microservice.customer.exceptions.BadRequestAlertException;
 import com.suraev.microservice.customer.repository.CustomerRepository;
+import com.suraev.microservice.customer.util.ResponseUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -41,7 +44,7 @@ public class CustomerOrderResource {
      * @param customerId ID покупателя.
      * @param order      заказ для создания
      * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} с телом заказа или со статусом {@Code 400 (Bad Request)} если у заказа уже есть ID.
-     * @throws ResponseStatusException если синтаксис ссылки нарушен
+     * @throws BadRequestAlertException если синтаксис ссылки нарушен/ не указан id клиента
      */
     @PostMapping("/customerOrders/{customerId}")
     public ResponseEntity<com.suraev.microservice.customer.domain.Order> createOrder(@PathVariable String customerId,
@@ -50,7 +53,7 @@ public class CustomerOrderResource {
         log.debug("REST request to save Order: {} for Customer ID: {}", order, customerId);
 
         if (customerId.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Customer: " + ENTITY_NAME);
+            throw new BadRequestAlertException("No customer", ENTITY_NAME,"noid");
         }
 
         final Optional<Customer> customerOptional =
@@ -63,7 +66,7 @@ public class CustomerOrderResource {
             return ResponseEntity.ok().body(order);
 
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Customer: " + ENTITY_NAME);
+            throw new BadRequestAlertException("Invalid Customer", ENTITY_NAME, "invalidcustomer");
         }
     }
 
@@ -76,13 +79,14 @@ public class CustomerOrderResource {
      * @return {@link ResponseEntity} со стасусом {@Code 200 (OK)} и с телом обновленного заказа,
      * или со статусом {@Code 404 (Not Found)} если ID заказа некорректный,
      * или со статусом {@Code 500 (Internal Server Error)} если заказ не может быть обновлен.
+     * @throws BadRequestAlertException если не обозначен ID клиента или такого клиента нет в БД
      */
     @PutMapping("/customOrders/{customerId}")
     @Transactional
     public ResponseEntity<Order> updateOrder(@PathVariable String customerId, @Valid @RequestBody Order order) {
 
         if (customerId.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Customer " + ENTITY_NAME);
+            throw new BadRequestAlertException("No customer",ENTITY_NAME,"noid");
         }
 
         final var customerOptional = customerRepository.findById(customerId);
@@ -98,7 +102,7 @@ public class CustomerOrderResource {
             return ResponseEntity.ok().body(order);
 
         } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid Customer: " + ENTITY_NAME);
+            throw new BadRequestAlertException("Invalid Customer", ENTITY_NAME,"invalidcustomer");
         }
     }
 
@@ -110,12 +114,13 @@ public class CustomerOrderResource {
      * @return список заказов клиента со статусом {@Code 200 (OK)}
      * или со статусом {@Code 404 (Not Found)} если ID заказа некорректный,
      * или со статусом {@Code 500 (Internal Server Error)} если заказ не может быть обновлен.
+     * @throws BadRequestAlertException если не обозначен ID клиента или такого клиента нет в БД
      */
     @GetMapping("/customOrders/{customerId}")
     public Set<Order> getAllOrders(@PathVariable String customerId) {
         log.debug("REST request to get all Order for Customer: {}", customerId);
         if (customerId.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Customer " + ENTITY_NAME);
+            throw new BadRequestAlertException("No Customer", ENTITY_NAME, "noid");
         }
         final var customerOptional = customerRepository.findById(customerId);
 
@@ -123,7 +128,7 @@ public class CustomerOrderResource {
             final var customer = customerOptional.get();
             return customer.getOrders();
         } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid Customer" + ENTITY_NAME);
+            throw new BadRequestAlertException("Invalid Customer", ENTITY_NAME, "invalidcustomer");
         }
     }
 
@@ -133,29 +138,26 @@ public class CustomerOrderResource {
      * @param customerId - ID клиента
      * @param orderId - ID заказа
      * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} и телом заказа, или статус {@Code 404 (NOT FOUND)}
-     * @throws ResponseStatusException 1) если ID клиента пустой {@Code 404 (NOT FOUND)}, 2) если заказ с указанным ID не существует {@Code 404 (NOT FOUND)},
+     * @throws BadRequestAlertException 1) если ID клиента пустой {@Code 404 (NOT FOUND)}, 2) если заказ с указанным ID не существует {@Code 404 (NOT FOUND)},
      * 3) если клиента с указанным ID не существует {@Code 500 (Internal Server Error).
      */
     @GetMapping("/customOrders/{customerId}/{orderId}")
     public ResponseEntity<Order> getOrder(@PathVariable String customerId, @PathVariable String orderId) {
+
         log.debug("REST request to get Order: {} for Customer: {}", orderId, customerId);
 
         if (customerId.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Customer" + ENTITY_NAME);
+            throw new BadRequestAlertException("No customer", ENTITY_NAME, "noid");
         }
         final var optionalCustomer = customerRepository.findById(customerId);
         if (optionalCustomer.isPresent()) {
             final var customer = optionalCustomer.get();
             final var optionalOrder = customer.getOrders().stream().filter(order -> Objects.equals(order.getId(), orderId)).findFirst();
-
-            if (optionalOrder.isPresent()) {
-                return ResponseEntity.ok().body(optionalOrder.get());
+            return ResponseUtil.wrapOrNotFound(optionalOrder);
             } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Order " + ENTITY_NAME);
+                throw new BadRequestAlertException("Invalid Customer", ENTITY_NAME, "invalidcustomer");
             }
         }
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid Customer"+ENTITY_NAME);
-    }
 
     /**
      * {@Code DELETE /customOrders/:customerId/:orderId}} : удалить заказ по ID у определенного клиента
@@ -168,7 +170,7 @@ public class CustomerOrderResource {
         log.debug("REST request to delete Order: {} for Customer: {}", orderId, customerId);
 
         if(customerId.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Customer" + ENTITY_NAME);
+            throw new BadRequestAlertException("No customer", ENTITY_NAME, "noid");
         }
 
         final var optionalCustomer = customerRepository.findById(customerId);
@@ -178,7 +180,7 @@ public class CustomerOrderResource {
             customerRepository.save(customer);
             return ResponseEntity.noContent().build();
         }
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid Customer"+ENTITY_NAME);
+        throw new BadRequestAlertException("Invalid Customer", ENTITY_NAME,"invalid customer");
     }
 
 
