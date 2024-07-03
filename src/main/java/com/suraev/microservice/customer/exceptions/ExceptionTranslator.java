@@ -43,39 +43,6 @@ public class ExceptionTranslator implements ProblemHandling, AdviceTrait {
 
 
     @Override
-    public ResponseEntity<Problem> process(@Nullable ResponseEntity<Problem> entity, NativeWebRequest request) {
-        if (entity == null) {
-            return null;
-        }
-        Problem problem = entity.getBody();
-        if (!(problem instanceof ConstraintViolationProblem || problem instanceof DefaultProblem)) {
-            return entity;
-        }
-
-        ProblemBuilder builder = Problem.builder()
-                .withType(Problem.DEFAULT_TYPE.equals(problem.getType()) ? ErrorConstants.DEFAULT_TYPE : problem.getType())
-                .withStatus(problem.getStatus())
-                .withTitle(problem.getTitle())
-                .with(PATH_KEY, request.getNativeRequest(HttpServletRequest.class).getRequestURI());
-
-        if (problem instanceof ConstraintViolationProblem) {
-            builder
-                    .with(VIOLATIONS_KEY, ((ConstraintViolationProblem) problem).getViolations())
-                    .with(MESSAGE_KEY, ErrorConstants.ERR_VALIDATION);
-        } else {
-            builder
-                    .withCause((DefaultProblem) problem)
-                    .withDetail(problem.getDetail())
-                    .withInstance(problem.getInstance());
-            problem.getParameters().forEach(builder::with);
-            if (!problem.getParameters().containsKey(MESSAGE_KEY) && problem.getStatus() != null) {
-                builder.with(MESSAGE_KEY, "error.http." + problem.getStatus().getStatusCode());
-            }
-        }
-        return new ResponseEntity<>(builder.build(), entity.getHeaders(), entity.getStatusCode());
-    }
-
-    @Override
     public ResponseEntity<Problem> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, @Nonnull NativeWebRequest request) {
         BindingResult result = exception.getBindingResult();
         List<FieldErrorVM> fieldErrorVMList = result.getFieldErrors().stream()
@@ -96,12 +63,12 @@ public class ExceptionTranslator implements ProblemHandling, AdviceTrait {
     public ResponseEntity<Problem> handleNoSuchElementException(NoSuchElementException exception, NativeWebRequest request) {
         Problem problem = Problem.builder()
                 .withStatus(Status.NOT_FOUND)
-                .with(MESSAGE_KEY, ErrorConstants.ENTITY_NOT_FOUND_TYPE)
                 .build();
         return create(exception, problem, request);
     }
     @ExceptionHandler
     public ResponseEntity<Problem> handleBadRequestException(BadRequestAlertException exception, NativeWebRequest request) {
+
         return create(exception, request, HeaderUtil.createFailureAlert(applicationName, false,exception.getEntityName(), exception.getErrorKey(), exception.getMessage()));
     }
 
