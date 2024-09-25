@@ -27,8 +27,8 @@ Customer Microservice - демо проект для демонстрации м
 #### http://localhost:8090/customer/swagger-ui/index.html
 
 ### TODO:
-1.Развернуть контейнеры в Kubernetes и EKS
-2.Настроить мониторинг
+1. Развернуть контейнеры в Kubernetes и EKS
+2. Настроить мониторинг
 
 
 
