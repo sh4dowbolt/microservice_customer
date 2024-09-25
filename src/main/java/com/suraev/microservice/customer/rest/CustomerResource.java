@@ -5,6 +5,8 @@ import com.suraev.microservice.customer.domain.Customer;
 import com.suraev.microservice.customer.exceptions.BadRequestAlertException;
 import com.suraev.microservice.customer.repository.CustomerRepository;
 import com.suraev.microservice.customer.util.ResponseUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name="Управление клиентом", description = "Панель управления клиентами")
 public class CustomerResource {
     private final Logger log = LoggerFactory.getLogger(CustomerResource.class);
 
@@ -36,103 +39,66 @@ public class CustomerResource {
         this.customerRepository = customerRepository;
     }
 
-
-    /**
-     * {@Code POST /customers} : создать нового клиента
-     * @param customer - это клиент необходимый для создания
-     * @return {@link ResponseEntity} со статусом {@Code 201 (Created)} с телом нового заказа, или со статусом {@Code 400 (Bad Request)} если у клиента уже есть ID.
-     * @throws BadRequestAlertException если клиент с данным ID уже существует
-     */
     @PostMapping("/customers")
+    @Operation(summary = "Создание клиента", description = "Позволяет создавать клиента")
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
-        log.debug("REST request to save Customer: {},",customer);
-        if(customer.getId()!= null) {
-            throw new BadRequestAlertException("A new customer cannot already have an ID", ENTITY_NAME,"idexists");
+        log.debug("REST request to save Customer: {},", customer);
+        if (customer.getId() != null) {
+            throw new BadRequestAlertException("A new customer cannot already have an ID", ENTITY_NAME, "idexists");
         }
         var result = customerRepository.save(customer);
 
         HttpHeaders headers = new HttpHeaders();
-        String message = String.format("A new %s is created with identifier %s",ENTITY_NAME,customer.getId());
+        String message = String.format("A new %s is created with identifier %s", ENTITY_NAME, customer.getId());
         headers.add("X-" + applicationName + "-alert", message);
         headers.add("X-" + applicationName + "-params", customer.getId());
 
-        return ResponseEntity.created(new URI("/api/customers/"+result.getId())).headers(headers).body(result);
+        return ResponseEntity.created(new URI("/api/customers/" + result.getId())).headers(headers).body(result);
     }
 
-
-    /**
-     * {@Code PUT /customers} : обновление существующего клиента
-     * @param customer - клиент необходимый для обновления
-     * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} и телом обновленного клиента,
-     * или со статусом {@Code 409 (Conflict)} если клиент некорректный,
-     * или со статусом {@Code 500 (Internal Server Error)} если клиент не может быть обновлен.
-     * @throws BadRequestAlertException если синтаксис ссылки некорректен.
-     */
     @PutMapping("/customers")
+    @Operation(summary = "Обновление клиента", description = "Позволяет обновлять клиента")
     public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer) {
         log.debug("REST request to update Customer: {}", customer);
 
-        if(customer.getId()==null) {
-            throw new BadRequestAlertException("An existing customer should have an id",ENTITY_NAME,"iddontexist");
+        if (customer.getId() == null) {
+            throw new BadRequestAlertException("An existing customer should have an id", ENTITY_NAME, "iddontexist");
         }
         var result = customerRepository.save(customer);
 
         HttpHeaders headers = new HttpHeaders();
-        String message = String.format("A %s is updated with identifier %s",ENTITY_NAME,customer.getId());
+        String message = String.format("A %s is updated with identifier %s", ENTITY_NAME, customer.getId());
         headers.add("X-" + applicationName + "-alert", message);
         headers.add("X-" + applicationName + "-params", customer.getId());
 
         return ResponseEntity.ok().headers(headers).body(result);
-
     }
 
-    /**
-     * {@Code GET /customers/:id} : получить клиента по ID
-     * @param id - ID клиента
-     * @return {@link ResponseEntity} со статусом {@Code 200 (OK)}  с телом заказа, или со статусом {@Code 404 (Not found)}.
-     */
-
+    @Operation(summary = "Получить клиента по ID", description = "Позволяет получить клиента по ID")
     @GetMapping("/customers/{id}")
     public ResponseEntity<Customer> getCustomer(@PathVariable String id) {
         log.debug("REST request to get Customer: {}", id);
-            final var customer = customerRepository.findById(id);
-            return ResponseUtil.wrapOrNotFound(customer);
+        final var customer = customerRepository.findById(id);
+        return ResponseUtil.wrapOrNotFound(customer);
     }
 
-    /**
-     * {@Code GET /customers} : получить список всех клиентов
-     * @return список всех клиентов со статусом {@Code 200 (OK)}
-     */
+    @Operation(summary = "Получить список клиентов", description = "Позволяет получить список клиентов")
     @GetMapping("/customers")
     public List<Customer> getAllCustomers() {
         log.debug("REST request to get all Customers");
         return customerRepository.findAll();
     }
 
-    /**
-     * {@Code DELETE /customers/:id} : удалить клиента по ID
-     * @param id ID клиеннта
-     * @return {@link ResponseEntity} со статусом {@Code 204 (NO_CONTENT)}
-     */
     @DeleteMapping("/customers/{id}")
+    @Operation(summary = "Удаление клиента", description = "Позволяет удалить клиента")
     public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
         log.debug("REST request to delete Customer: {}", id);
         customerRepository.deleteById(id);
 
-        HttpHeaders headers= new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         String message = String.format("A %s is deleted with identifier %s", ENTITY_NAME, id);
         headers.add(applicationName, message);
 
         return ResponseEntity.noContent().headers(headers).build();
     }
-
-
-
-
-    }
-
-
-
-
-
-
+}

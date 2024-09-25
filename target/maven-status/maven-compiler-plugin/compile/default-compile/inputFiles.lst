@@ -1,0 +1,17 @@
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\repository\CustomerRepository.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\rest\CustomerResource.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\configuration\OpenApiConfig.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\domain\Health.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\exceptions\ExceptionTranslator.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\domain\Order.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\rest\HealthResource.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\domain\HealthStatus.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\exceptions\FieldErrorVM.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\MicroserviceCustomerApplication.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\util\HeaderUtil.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\util\ResponseUtil.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\domain\Customer.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\rest\CustomerOrderResource.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\exceptions\BadRequestAlertException.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\configuration\ApplicationConfiguration.java
+C:\Users\SHADOW FIEND\IdeaProjects\microservice_customer\src\main\java\com\suraev\microservice\customer\exceptions\ErrorConstants.java

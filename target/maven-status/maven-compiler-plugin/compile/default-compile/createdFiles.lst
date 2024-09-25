@@ -1,0 +1,17 @@
+com\suraev\microservice\customer\exceptions\ExceptionTranslator.class
+com\suraev\microservice\customer\rest\CustomerResource.class
+com\suraev\microservice\customer\rest\CustomerOrderResource.class
+com\suraev\microservice\customer\repository\CustomerRepository.class
+com\suraev\microservice\customer\exceptions\ErrorConstants.class
+com\suraev\microservice\customer\rest\HealthResource.class
+com\suraev\microservice\customer\domain\HealthStatus.class
+com\suraev\microservice\customer\util\ResponseUtil.class
+com\suraev\microservice\customer\domain\Customer.class
+com\suraev\microservice\customer\configuration\ApplicationConfiguration.class
+com\suraev\microservice\customer\domain\Order.class
+com\suraev\microservice\customer\domain\Health.class
+com\suraev\microservice\customer\util\HeaderUtil.class
+com\suraev\microservice\customer\exceptions\BadRequestAlertException.class
+com\suraev\microservice\customer\configuration\OpenApiConfig.class
+com\suraev\microservice\customer\MicroserviceCustomerApplication.class
+com\suraev\microservice\customer\exceptions\FieldErrorVM.class

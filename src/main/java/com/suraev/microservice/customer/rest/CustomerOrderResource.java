@@ -6,6 +6,8 @@ import com.suraev.microservice.customer.domain.Order;
 import com.suraev.microservice.customer.exceptions.BadRequestAlertException;
 import com.suraev.microservice.customer.repository.CustomerRepository;
 import com.suraev.microservice.customer.util.ResponseUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,29 +26,20 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name="Взаимодействие с микросервисом заказов", description = "Обработка запросов с микросервиса заказов")
 public class CustomerOrderResource {
     private final Logger log = LoggerFactory.getLogger(CustomerOrderResource.class);
     private static final String ENTITY_NAME = "customer";
-
     @Value("${spring.application.name}")
     private String applicationName;
-
     private final CustomerRepository customerRepository;
-
 
     public CustomerOrderResource(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
-    /**
-     * {@Code POST /customerOrders/{customerId}} : Создаем новый заказ для указанного клиента
-     *
-     * @param customerId ID покупателя.
-     * @param order      заказ для создания
-     * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} с телом заказа или со статусом {@Code 400 (Bad Request)} если у заказа уже есть ID.
-     * @throws BadRequestAlertException если синтаксис ссылки нарушен/ не указан id клиента
-     */
     @PostMapping("/customerOrders/{customerId}")
+    @Operation(summary = "Создать заказ для определенного клиента", description = "Позволяет создавать заказ для определенного клиента")
     public ResponseEntity<com.suraev.microservice.customer.domain.Order> createOrder(@PathVariable String customerId,
                                                                                      @Valid @RequestBody Order order) {
 
@@ -70,18 +63,8 @@ public class CustomerOrderResource {
         }
     }
 
-
-    /**
-     * {@Code PUT /customOrders/:customerId} : Обновление существубщего заказа по заданному ID клиента"
-     *
-     * @param customerId ID клиента
-     * @param order      заказ для обновления
-     * @return {@link ResponseEntity} со стасусом {@Code 200 (OK)} и с телом обновленного заказа,
-     * или со статусом {@Code 404 (Not Found)} если ID заказа некорректный,
-     * или со статусом {@Code 500 (Internal Server Error)} если заказ не может быть обновлен.
-     * @throws BadRequestAlertException если не обозначен ID клиента или такого клиента нет в БД
-     */
-    @PutMapping("/customOrders/{customerId}")
+    @PutMapping("/customerOrders/{customerId}")
+    @Operation(summary = "Обновление существующего заказа у определенного клиента", description = "Позволяет обновить существующий заказ у определенного клиента")
     @Transactional
     public ResponseEntity<Order> updateOrder(@PathVariable String customerId, @Valid @RequestBody Order order) {
 
@@ -106,17 +89,8 @@ public class CustomerOrderResource {
         }
     }
 
-
-    /**
-     * {@Code GET /customOrder/:customerId} : получить все заказы клиента
-     *
-     * @param customerId - ID клиента
-     * @return список заказов клиента со статусом {@Code 200 (OK)}
-     * или со статусом {@Code 404 (Not Found)} если ID заказа некорректный,
-     * или со статусом {@Code 500 (Internal Server Error)} если заказ не может быть обновлен.
-     * @throws BadRequestAlertException если не обозначен ID клиента или такого клиента нет в БД
-     */
-    @GetMapping("/customOrders/{customerId}")
+    @Operation(summary = "Получить все заказы определенного клиента", description = "Позволяет получить все заказы определенного клиента")
+    @GetMapping("/customerOrders/{customerId}")
     public Set<Order> getAllOrders(@PathVariable String customerId) {
         log.debug("REST request to get all Order for Customer: {}", customerId);
         if (customerId.isBlank()) {
@@ -132,16 +106,8 @@ public class CustomerOrderResource {
         }
     }
 
-
-    /**
-     * {@Code GET /customOrder/:customerId/:orderId} : получить заказ по ID конкретного клиента
-     * @param customerId - ID клиента
-     * @param orderId - ID заказа
-     * @return {@link ResponseEntity} со статусом {@Code 200 (OK)} и телом заказа, или статус {@Code 404 (NOT FOUND)}
-     * @throws BadRequestAlertException 1) если ID клиента пустой {@Code 404 (NOT FOUND)}, 2) если заказ с указанным ID не существует {@Code 404 (NOT FOUND)},
-     * 3) если клиента с указанным ID не существует {@Code 500 (Internal Server Error).
-     */
-    @GetMapping("/customOrders/{customerId}/{orderId}")
+    @Operation(summary = "Получить определенный заказ у конкретного клиента", description = "Позволяет получить определенный заказ у конкретного клиента")
+    @GetMapping("/customerOrders/{customerId}/{orderId}")
     public ResponseEntity<Order> getOrder(@PathVariable String customerId, @PathVariable String orderId) {
 
         log.debug("REST request to get Order: {} for Customer: {}", orderId, customerId);
@@ -160,13 +126,9 @@ public class CustomerOrderResource {
             }
         }
 
-    /**
-     * {@Code DELETE /customOrders/:customerId/:orderId}} : удалить заказ по ID у определенного клиента
-     * @param customerId - ID клиента
-     * @param orderId - ID заказа
-     * @return {@link ResponseEntity} со статусом {@Code 204 (NO_CONTENT)}
-     */
-    @DeleteMapping("/customOrders/{customerId}/{orderId}")
+    @Operation(summary = "Удалить определенный заказ у указанного клиента", description = "Позволяет удалить определенный заказ у указанного клиента")
+    @DeleteMapping("/customerOrders/{customerId}/{orderId}")
+    @Transactional
         public ResponseEntity<Void> deleteOrder(@PathVariable String customerId, @PathVariable String orderId) {
         log.debug("REST request to delete Order: {} for Customer: {}", orderId, customerId);
 

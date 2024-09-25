@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  microservice-customer:
+    build: .
+    container_name: microservice_customer
+    ports:
+      - target: 8090
+        published: 8090
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    links:
+      - mongodb
+    environment:
+      - SPRING_MONGODB_URL=mongodb://mongodb:27017/
+      - SPRING_MONGODB_DATABASE=customer
+    networks:
+      - node-network
+
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - target: 27017
+        published: 27017
+    container_name: db1
+    healthcheck:
+      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    volumes:
+      - dbdata1:/data/db
+    networks:
+      - node-network
+
+volumes:
+  dbdata1:
+networks:
+  node-network:
+    driver: bridge
